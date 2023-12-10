@@ -2,4 +2,4 @@
 
 * This work made me step out of my comfort zone and want to research C++ more and more.
 
-## Lucio Mauro Pereira
+### Teacher : Lucio Mauro Pereira
