@@ -1,7 +1,8 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <limits>
-#include <new>
+#include <cstring>
 
 using namespace std;
 
@@ -15,13 +16,47 @@ private:
 public:
     Data(int d = 0, int m = 0, int a = 0) : dia(d), mes(m), ano(a) {}
 
+    void setDia(int d) { dia = d; }
+    void setMes(int m) { mes = m; }
+    void setAno(int a) { ano = a; }
+
+    int getDia() const { return dia; }
+    int getMes() const { return mes; }
+    int getAno() const { return ano; }
+
+    bool dataValida() const
+    {
+        return (dia >= 1 && dia <= 31) && (mes >= 1 && mes <= 12);
+    }
+
+    void setValores(int d, int m, int a)
+    {
+        setDia(d);
+        setMes(m);
+        setAno(a);
+    }
+
     void lerData()
     {
         cout << "Digite o dia: ";
         cin >> dia;
 
-        cout << "Digite o mes: ";
-        cin >> mes;
+        while (dia < 1 || dia > 31)
+        {
+            cout << "Dia invalido. Digite novamente: ";
+            cin >> dia;
+        }
+
+        do
+        {
+            cout << "Digite o mes: ";
+            cin >> mes;
+
+            if (mes < 1 || mes > 12)
+            {
+                cout << "Mes invalido. Digite novamente.\n";
+            }
+        } while (mes < 1 || mes > 12);
 
         cout << "Digite o ano: ";
         cin >> ano;
@@ -36,39 +71,39 @@ public:
     {
         return mes == mesComparar;
     }
-
-    int getDia() const { return dia; }
-    int getMes() const { return mes; }
-    int getAno() const { return ano; }
 };
 
 class Pessoa
 {
-protected:
+private:
     string nome;
     Data dataNascimento;
 
 public:
-    Pessoa(const string &n = "", int d = 0, int m = 0, int a = 0) : nome(n), dataNascimento(d, m, a) {}
+    virtual ~Pessoa() {}
 
-    void setNome(const string &n) { nome = n; }
-    string getNome() const { return nome; }
+    Pessoa(const string &n = "", const Data &data = Data()) : nome(n), dataNascimento(data) {}
+
+    void setNome(const string &n)
+    {
+        nome = n;
+    }
+
+    string getNome() const
+    {
+        return nome;
+    }
 
     virtual void escreverPessoa() const
     {
         escreverNome();
-        cout << "\nData de Nascimento: ";
+        cout << "Data de Nascimento: ";
         dataNascimento.escreverData();
     }
 
     void escreverNome() const
     {
         cout << "Nome: " << nome << endl;
-    }
-
-    bool mesAniversario(int mesComparar) const
-    {
-        return dataNascimento.Data::mesAniversario(mesComparar);
     }
 
     void lerNome()
@@ -82,9 +117,54 @@ public:
         dataNascimento.lerData();
     }
 
-    int getDiaNascimento() const { return dataNascimento.getDia(); }
-    int getMesNascimento() const { return dataNascimento.getMes(); }
-    int getAnoNascimento() const { return dataNascimento.getAno(); }
+    int getDiaNascimento() const
+    {
+        return dataNascimento.getDia();
+    }
+
+    int getMesNascimento() const
+    {
+        return dataNascimento.getMes();
+    }
+
+    int getAnoNascimento() const
+    {
+        return dataNascimento.getAno();
+    }
+
+    void levarValorNome(const string &n)
+    {
+        setNome(n);
+    }
+
+    string recuperarValorNome() const
+    {
+        return getNome();
+    }
+
+    void lerNomeTeclado()
+    {
+        lerNome();
+    }
+
+    void escreverNomeTela() const
+    {
+        escreverNome();
+    }
+
+    void lerPessoaTeclado()
+    {
+        lerNome();
+        lerDataNascimento();
+    }
+
+    void escreverPessoaTela() const
+    {
+        escreverPessoa();
+    }
+
+    virtual string getTipo() const = 0;
+    virtual void escreverDetalhes() const = 0;
 };
 
 class Aluno : public Pessoa
@@ -94,7 +174,7 @@ private:
     static int quantidadeAlunos;
 
 public:
-    Aluno(const string &n = "", int d = 0, int m = 0, int a = 0, int mat = 0) : Pessoa(n, d, m, a), matricula(mat)
+    Aluno(const string &n = "", int d = 0, int m = 0, int a = 0, int mat = 0) : Pessoa(n, Data(d, m, a)), matricula(mat)
     {
         quantidadeAlunos++;
     }
@@ -107,8 +187,23 @@ public:
     void escreverAluno() const
     {
         escreverNome();
-        cout << "Matricula: " << matricula << endl;
         cout << "Data de Nascimento: " << getDiaNascimento() << "/" << getMesNascimento() << "/" << getAnoNascimento() << endl;
+        cout << "Matricula: " << matricula << endl;
+    }
+
+    string getTipo() const override
+    {
+        return "Aluno";
+    }
+
+    int getMatricula() const
+    {
+        return matricula;
+    }
+
+    void escreverDetalhes() const override
+    {
+        cout << "Matricula: " << matricula << endl;
     }
 };
 
@@ -121,7 +216,7 @@ private:
     static int quantidadeProfessores;
 
 public:
-    Professor(const string &n = "", int d = 0, int m = 0, int a = 0, const string &tit = "") : Pessoa(n, d, m, a), titulacao(tit)
+    Professor(const string &n = "", int d = 0, int m = 0, int a = 0, const string &tit = "") : Pessoa(n, Data(d, m, a)), titulacao(tit)
     {
         quantidadeProfessores++;
     }
@@ -131,44 +226,89 @@ public:
         return quantidadeProfessores;
     }
 
+    string getTitulacao() const
+    {
+        return titulacao;
+    }
+
     void escreverProfessor() const
     {
         escreverNome();
         cout << "Data de Nascimento: " << getDiaNascimento() << "/" << getMesNascimento() << "/" << getAnoNascimento() << endl;
         cout << "Titulacao: " << titulacao << endl;
     }
+
+    string getTipo() const override
+    {
+        return "Professor";
+    }
+
+    void escreverDetalhes() const override
+    {
+        cout << "Titulacao: " << titulacao << endl;
+    }
 };
 
 int Professor::quantidadeProfessores = 0;
 
-void listarAlunos(const Aluno *alunos, int tamanho)
+void salvarDados(const Pessoa *const pessoas[], int tamanho, const string &nomeArquivo);
+void carregarDados(Pessoa *pessoas[], int &quantidadePessoas, const string &nomeArquivo);
+
+void listarAlunos(const Pessoa *const pessoas[], int tamanho)
 {
     cout << "\n--- Listagem de Alunos ---\n";
+    bool alunosCadastrados = false;
+
     for (int i = 0; i < tamanho; ++i)
     {
-        alunos[i].escreverAluno();
-        cout << "------------------------------------\n";
+        const Aluno *aluno = dynamic_cast<const Aluno *>(pessoas[i]);
+
+        if (aluno)
+        {
+            alunosCadastrados = true;
+            aluno->escreverPessoa();
+            aluno->escreverDetalhes();
+            cout << "------------------------------------\n";
+        }
+    }
+
+    if (!alunosCadastrados)
+    {
+        cout << "Nenhum aluno cadastrado.\n";
     }
 }
 
-void listarProfessores(const Professor *professores, int tamanho)
+void listarProfessores(const Pessoa *const pessoas[], int tamanho)
 {
     cout << "\n--- Listagem de Professores ---\n";
+
     for (int i = 0; i < tamanho; ++i)
     {
-        professores[i].escreverProfessor();
-        cout << "------------------------------------\n";
+        const Professor *professor = dynamic_cast<const Professor *>(pessoas[i]);
+
+        if (professor)
+        {
+            professor->escreverPessoa();
+            professor->escreverDetalhes();
+            cout << "------------------------------------\n";
+        }
+    }
+
+    if (Professor::getQuantidadeProfessores() == 0)
+    {
+        cout << "Nenhum professor cadastrado.\n";
     }
 }
 
-void listarAniversariantes(const Pessoa *pessoas, int tamanho, int mes)
+void listarAniversariantes(const Pessoa *const pessoas[], int tamanho, int mes)
 {
     cout << "\n--- Listagem de Aniversariantes do Mes ---\n";
     for (int i = 0; i < tamanho; ++i)
     {
-        if (pessoas[i].mesAniversario(mes))
+        if (pessoas[i]->getMesNascimento() == mes)
         {
-            pessoas[i].escreverPessoa();
+            cout << "Tipo: " << pessoas[i]->getTipo() << endl;
+            pessoas[i]->escreverPessoa();
             cout << "------------------------------------\n";
         }
     }
@@ -187,28 +327,102 @@ int mostrarMenu()
     cout << "5 - Listar aniversariantes do mes\n";
     cout << "Escolha uma opcao: " << endl;
 
-    // Verifica se a entrada e valida (um numero inteiro)
     while (!(cin >> escolha) || escolha < 0 || escolha > 5)
     {
-        cin.clear();                                         // Limpa a flag de erro
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Descarta a entrada invalida
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Opcao invalida. Escolha novamente: ";
     }
 
-    cin.ignore(); // Limpar o buffer do teclado
+    cin.ignore();
 
     return escolha;
+}
+
+void salvarDados(const Pessoa *const pessoas[], int tamanho, const string &nomeArquivo)
+{
+    ofstream arquivo(nomeArquivo, ios::out);
+
+    if (arquivo.is_open())
+    {
+        for (int i = 0; i < tamanho; ++i)
+        {
+            arquivo << pessoas[i]->getTipo() << " ";
+            arquivo << pessoas[i]->recuperarValorNome() << " ";
+            arquivo << pessoas[i]->getDiaNascimento() << " ";
+            arquivo << pessoas[i]->getMesNascimento() << " ";
+            arquivo << pessoas[i]->getAnoNascimento() << " ";
+
+            // Se for um Aluno, salvar a matrícula
+            if (pessoas[i]->getTipo() == "Aluno")
+            {
+                arquivo << dynamic_cast<const Aluno *>(pessoas[i])->getMatricula() << " ";
+            }
+            // Se for um Professor, salvar a titulação
+            else if (pessoas[i]->getTipo() == "Professor")
+            {
+                arquivo << dynamic_cast<const Professor *>(pessoas[i])->getTitulacao() << " ";
+            }
+
+            arquivo << endl;
+        }
+
+        arquivo.close();
+        cout << "Dados salvos com sucesso.\n";
+    }
+    else
+    {
+        cerr << "Não foi possível abrir o arquivo para salvar os dados.\n";
+    }
+}
+
+void carregarDados(Pessoa *pessoas[], int &quantidadePessoas, const string &nomeArquivo)
+{
+    ifstream arquivo(nomeArquivo, ios::in);
+
+    if (arquivo.is_open())
+    {
+        while (arquivo >> ws) // Pular espaços em branco
+        {
+            string tipo;
+            string nome;
+            int dia, mes, ano;
+
+            arquivo >> tipo >> nome >> dia >> mes >> ano;
+
+            // Se for um Aluno, carregar a matrícula
+            if (tipo == "Aluno")
+            {
+                int matricula;
+                arquivo >> matricula;
+                pessoas[quantidadePessoas++] = new Aluno(nome, dia, mes, ano, matricula);
+            }
+            // Se for um Professor, carregar a titulação
+            else if (tipo == "Professor")
+            {
+                string titulacao;
+                arquivo >> titulacao;
+                pessoas[quantidadePessoas++] = new Professor(nome, dia, mes, ano, titulacao);
+            }
+        }
+
+        arquivo.close();
+        cout << "Dados carregados com sucesso.\n";
+    }
+    else
+    {
+        cerr << "Não foi possível abrir o arquivo para carregar os dados.\n";
+    }
 }
 
 int main()
 {
     const int capacidadeMaxima = 100;
-    Aluno alunos[capacidadeMaxima];
-    Professor professores[capacidadeMaxima];
-    Pessoa pessoas[capacidadeMaxima];
+    Pessoa *pessoas[capacidadeMaxima];
 
-    int quantidadeAlunos = 0;
-    int quantidadeProfessores = 0;
+    int quantidadePessoas = 0;
+
+    carregarDados(pessoas, quantidadePessoas, "dados.dat");
 
     int escolha;
 
@@ -218,25 +432,23 @@ int main()
 
         try
         {
-
             switch (escolha)
             {
             case 0:
                 cout << "Encerrando o programa.\n";
                 break;
             case 1:
-                if (quantidadeAlunos < capacidadeMaxima)
+                if (Aluno::getQuantidadeAlunos() < capacidadeMaxima)
                 {
-                    alunos[quantidadeAlunos].lerNome();
-                    alunos[quantidadeAlunos].lerDataNascimento();
+                    Aluno novoAluno;
+                    novoAluno.lerNomeTeclado();
+                    novoAluno.lerDataNascimento();
                     int matricula;
 
                     cout << "Digite a matricula do aluno: ";
                     cin >> matricula;
 
-                    alunos[quantidadeAlunos] = Aluno(alunos[quantidadeAlunos].getNome(), alunos[quantidadeAlunos].getDiaNascimento(), alunos[quantidadeAlunos].getMesNascimento(), alunos[quantidadeAlunos].getAnoNascimento(), matricula);
-                    pessoas[quantidadeAlunos] = alunos[quantidadeAlunos];
-                    quantidadeAlunos++;
+                    pessoas[quantidadePessoas++] = new Aluno(novoAluno.recuperarValorNome(), novoAluno.getDiaNascimento(), novoAluno.getMesNascimento(), novoAluno.getAnoNascimento(), matricula);
                 }
                 else
                 {
@@ -245,10 +457,11 @@ int main()
                 break;
 
             case 2:
-                if (quantidadeProfessores < capacidadeMaxima)
+                if (Professor::getQuantidadeProfessores() < capacidadeMaxima)
                 {
-                    professores[quantidadeProfessores].lerNome();
-                    professores[quantidadeProfessores].lerDataNascimento();
+                    Professor novoProfessor;
+                    novoProfessor.lerNomeTeclado();
+                    novoProfessor.lerDataNascimento();
                     string titulacao;
 
                     cout << "Escolha a titulacao do Professor:\n";
@@ -279,9 +492,7 @@ int main()
                         titulacao = "Doutor";
                     }
 
-                    professores[quantidadeProfessores] = Professor(professores[quantidadeProfessores].getNome(), professores[quantidadeProfessores].getDiaNascimento(), professores[quantidadeProfessores].getMesNascimento(), professores[quantidadeProfessores].getAnoNascimento(), titulacao);
-                    pessoas[quantidadeAlunos + quantidadeProfessores] = professores[quantidadeProfessores];
-                    quantidadeProfessores++;
+                    pessoas[quantidadePessoas++] = new Professor(novoProfessor.recuperarValorNome(), novoProfessor.getDiaNascimento(), novoProfessor.getMesNascimento(), novoProfessor.getAnoNascimento(), titulacao);
                 }
                 else
                 {
@@ -290,9 +501,9 @@ int main()
                 break;
 
             case 3:
-                if (quantidadeAlunos > 0)
+                if (quantidadePessoas > 0)
                 {
-                    listarAlunos(alunos, quantidadeAlunos);
+                    listarAlunos(pessoas, quantidadePessoas);
                 }
                 else
                 {
@@ -300,9 +511,9 @@ int main()
                 }
                 break;
             case 4:
-                if (quantidadeProfessores > 0)
+                if (Professor::getQuantidadeProfessores() > 0)
                 {
-                    listarProfessores(professores, quantidadeProfessores);
+                    listarProfessores(pessoas, quantidadePessoas);
                 }
                 else
                 {
@@ -312,19 +523,16 @@ int main()
             case 5:
             {
                 int mes;
-                int total = quantidadeAlunos + quantidadeProfessores;
                 cout << "Digite o mes para listar os aniversariantes: ";
                 cin >> mes;
 
-                listarAniversariantes(pessoas, total, mes);
+                listarAniversariantes(pessoas, quantidadePessoas, mes);
                 break;
             }
             default:
                 cout << "Opcao invalida.\n";
                 break;
             }
-
-            // TRATAMENTO DE ERROS USANDO TRY E CATCH!!
         }
         catch (const bad_alloc &e)
         {
@@ -336,6 +544,15 @@ int main()
         }
 
     } while (escolha != 0);
+
+    // Salvar dados ao encerrar o programa
+    salvarDados(pessoas, quantidadePessoas, "dados.dat");
+
+    // Liberar memória
+    for (int i = 0; i < quantidadePessoas; ++i)
+    {
+        delete pessoas[i];
+    }
 
     return 0;
 }
