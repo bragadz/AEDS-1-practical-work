@@ -545,10 +545,8 @@ int main()
 
     } while (escolha != 0);
 
-    // Salvar dados ao encerrar o programa
     salvarDados(pessoas, quantidadePessoas, "dados.dat");
 
-    // Liberar memória
     for (int i = 0; i < quantidadePessoas; i++)
     {
         delete pessoas[i];
