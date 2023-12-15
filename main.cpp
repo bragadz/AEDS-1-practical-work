@@ -259,7 +259,7 @@ void listarAlunos(const Pessoa *const pessoas[], int tamanho)
     cout << "\n--- Listagem de Alunos ---\n";
     bool alunosCadastrados = false;
 
-    for (int i = 0; i < tamanho; ++i)
+    for (int i = 0; i < tamanho; i++)
     {
         const Aluno *aluno = dynamic_cast<const Aluno *>(pessoas[i]);
 
@@ -282,7 +282,7 @@ void listarProfessores(const Pessoa *const pessoas[], int tamanho)
 {
     cout << "\n--- Listagem de Professores ---\n";
 
-    for (int i = 0; i < tamanho; ++i)
+    for (int i = 0; i < tamanho; i++)
     {
         const Professor *professor = dynamic_cast<const Professor *>(pessoas[i]);
 
@@ -303,7 +303,7 @@ void listarProfessores(const Pessoa *const pessoas[], int tamanho)
 void listarAniversariantes(const Pessoa *const pessoas[], int tamanho, int mes)
 {
     cout << "\n--- Listagem de Aniversariantes do Mes ---\n";
-    for (int i = 0; i < tamanho; ++i)
+    for (int i = 0; i < tamanho; i++)
     {
         if (pessoas[i]->getMesNascimento() == mes)
         {
@@ -345,7 +345,7 @@ void salvarDados(const Pessoa *const pessoas[], int tamanho, const string &nomeA
 
     if (arquivo.is_open())
     {
-        for (int i = 0; i < tamanho; ++i)
+        for (int i = 0; i < tamanho; i++)
         {
             arquivo << pessoas[i]->getTipo() << " ";
             arquivo << pessoas[i]->recuperarValorNome() << " ";
@@ -549,7 +549,7 @@ int main()
     salvarDados(pessoas, quantidadePessoas, "dados.dat");
 
     // Liberar memória
-    for (int i = 0; i < quantidadePessoas; ++i)
+    for (int i = 0; i < quantidadePessoas; i++)
     {
         delete pessoas[i];
     }
